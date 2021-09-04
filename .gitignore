@@ -1,0 +1,7 @@
+.vscode
+*.iso
+
+kernel/build/*
+kernel/bin/*
+
+iso/boot/kernel/*
