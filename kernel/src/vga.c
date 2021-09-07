@@ -7,12 +7,13 @@ static vgach_t* VGA_BUFFER = (vgach_t*)VGA_BUFFER_ADDR;
 
 void vga_clear() {
     for (int i = 0; i < 25 * 80; i++) {
-        VGA_BUFFER[i].data = ' ';
-        VGA_BUFFER[i].attr = 0x07;
+        vga_setchar(' ', i);
+        vga_setbg(VGA_COLOR_BLACK, i);
+        vga_setfg(VGA_COLOR_LIGHT_GREY, i);
     }
 }
 
-void vga_putc(char data, int index)
+void vga_setchar(char data, int index)
 {
     VGA_BUFFER[index].data = data;
 }

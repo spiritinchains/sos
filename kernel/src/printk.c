@@ -27,14 +27,14 @@ int printk(const char* fmt, ...) {
 
 				while (i) {
 					i--;
-					tty_putc(_buf[i]);
+					term_putc(_buf[i]);
 				}
 
 				fmt++;
 				continue;
 			}
 		}
-		tty_putc(*fmt);
+		term_putc(*fmt);
 		fmt++;
 	}
 

@@ -1,14 +1,38 @@
 
 #include <vga.h>
 
-void tty_init() {
+#define TERM_COLS 80
+#define TERM_ROWS 25
+
+static char layout_enUS[2][58] = {
+    {
+    '\0', '\x1b', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
+    '-', '=', '\b', '\t', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p',
+    '[', ']', '\n', '\0', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 
+    ';', '\'', '`', '\0', '\\', 'z', 'x', 'c', 'v', 'b', 'n', 'm', 
+    ',', '.', '/', '\0', '\0', '\0', ' '
+    },{
+    '\0', '\x1b', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')',
+    '_', '+', '\b', '\t', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',
+    '{', '}', '\n', '\0', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L',
+    ':', '"', '~', '\0', '|', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 
+    '<', '>', '?', '\0', '\0', '\0', ' '
+    }
+};
+
+void term_init() {
 	vga_clear();
 	vga_setcursor(0);
 	vga_enablecursor();
 }
 
+// input keycodes from keyboard input
+void term_input(char kc) {
+    // TODO: use a circular buffer
+    term_putc(layout_enUS[kc / 58][kc % 58]);
+}
 
-void tty_putc(char ch)
+void term_putc(char ch)
 {
 	// TODO: handle special chars
     int pos;
@@ -21,18 +45,18 @@ void tty_putc(char ch)
         //backspace case
         if (pos) {
             vga_setcursor(--pos);
-            vga_putc(' ', pos);
+            vga_setchar(' ', pos);
         }
     }
     else if (ch == '\n') {
         // newline case (carriage return implied)
-        pos += VGA_COLS;
-        pos -= pos % VGA_COLS;
+        pos += TERM_COLS;
+        pos -= pos % TERM_COLS;
         vga_setcursor(pos);
     }
     else {
         // general case
-        vga_putc(ch, pos);
+        vga_setchar(ch, pos);
         vga_setcursor(++pos);
     }
 }

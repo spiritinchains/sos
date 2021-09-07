@@ -10,6 +10,6 @@ void idt_init();
 
 int main() {
     idt_init();
-	tty_init();
+	term_init();
     printk("yay I managed to print this text");
 }

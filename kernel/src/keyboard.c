@@ -5,34 +5,20 @@
 #include <8042ctrl.h>
 #include <terminal.h>
 
+#define SC1_KEY_LSHIFT 0x2a
+#define SC1_RELEASE 0x80
+
 /*
  * Keyboard TODO:
  * Handle multibyte keycodes
+ * Handle other Scan code sets
+ * Come up with a standard keycode set
  */
 
 void pic1_ack();
 
-
 static uint8_t keycode;
 static bool shiftPressed = false;
-
-// this part of the code probs doesn't belong here
-
-static char layout_enUS[2][58] = {
-    {
-    '\0', '\x1b', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
-    '-', '=', '\b', '\t', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p',
-    '[', ']', '\n', '\0', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 
-    ';', '\'', '`', '\0', '\\', 'z', 'x', 'c', 'v', 'b', 'n', 'm', 
-    ',', '.', '/', '\0', '\0', '\0', ' '
-    },{
-    '\0', '\x1b', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')',
-    '_', '+', '\b', '\t', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',
-    '{', '}', '\n', '\0', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L',
-    ':', '"', '~', '\0', '|', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 
-    '<', '>', '?', '\0', '\0', '\0', ' '
-    }
-};
 
 void kb_processKeycode()
 {
@@ -41,9 +27,10 @@ void kb_processKeycode()
     // unset shiftPressed when keycode is LSHIFT Released, do nothing otherwise
     shiftPressed &= (keycode != (SC1_KEY_LSHIFT + SC1_RELEASE));
     
+    // stopgap solution before real keycodes are implemented
     if ((keycode > 0 && keycode < 58)) {
         // vga_putc(layout_enUS[shiftPressed][keycode]);
-        tty_putc(layout_enUS[shiftPressed][keycode]);
+        term_input(keycode + (shiftPressed * 58));
     }
 }
 

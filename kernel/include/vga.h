@@ -11,9 +11,6 @@
 #define VGA_REG_CURSOR_HI 14
 #define VGA_REG_CURSOR_LO 15
 
-#define VGA_ROWS 25
-#define VGA_COLS 80
-
 #pragma pack(2)
 typedef struct {
     char data;
@@ -41,7 +38,7 @@ typedef enum {
 
 void vga_clear();
 
-void vga_putc(char, int);			// Put char at index
+void vga_setchar(char, int);			// Put char at index
 
 void vga_setbg(vgacolor_t, int);  	// Set background color
 void vga_setfg(vgacolor_t, int);  	// Set foreground color
