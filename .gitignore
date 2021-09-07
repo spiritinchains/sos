@@ -4,4 +4,4 @@
 kernel/build/*
 kernel/bin/*
 
-iso/boot/kernel/*
+iso/boot/kernel.bin

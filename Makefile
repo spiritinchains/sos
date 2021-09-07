@@ -10,7 +10,7 @@ kernel:
 	make -C kernel
 
 iso: kernel
-	cp kernel/bin/kernel.bin iso/boot/kernel/kernel.bin
+	cp kernel/bin/kernel.bin iso/boot/kernel.bin
 	grub-mkrescue -o os.iso -d /usr/lib/grub/i386-pc iso
 
 clean:
