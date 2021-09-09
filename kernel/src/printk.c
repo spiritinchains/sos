@@ -33,6 +33,29 @@ int printk(const char* fmt, ...) {
 				fmt++;
 				continue;
 			}
+			else if (*fmt == 'x') {
+				uint32_t _arg = va_arg(arg_list, uint32_t);
+
+				int32_t i = 0;
+				char _buf[10];
+
+				while (_arg) {
+					_buf[i] = (_arg % 16) + '0';
+					if (_buf[i] > '9') {
+						_buf[i] += 7;
+					}
+					_arg /= 16;
+					i++;
+				}
+
+				while (i) {
+					i--;
+					term_putc(_buf[i]);
+				}
+
+				fmt++;
+				continue;
+			}
 		}
 		term_putc(*fmt);
 		fmt++;
