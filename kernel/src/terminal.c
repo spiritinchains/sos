@@ -1,4 +1,7 @@
 
+#include <kernel.h>
+
+#include <terminal.h>
 #include <vga.h>
 
 #define TERM_COLS 80

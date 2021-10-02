@@ -2,8 +2,15 @@
 #include <kernel.h>
 
 #include <keyboard.h>
-#include <8042ctrl.h>
 #include <terminal.h>
+
+#define PS2CTRL_DATA        0x60        // PS2 Controller Data Port
+#define PS2CTRL_STAT_CMD    0x64        // Status/Command Register
+
+#define KB_RES_SELF_TEST_PASS 0xAA
+#define KB_RES_ECHO 0xEE
+#define KB_RES_ACK 0xFA
+#define KB_RES_RESEND 0xFE
 
 #define SC1_KEY_LSHIFT 0x2a
 #define SC1_RELEASE 0x80
@@ -20,7 +27,32 @@ void pic1_ack();
 static uint8_t keycode;
 static bool shiftPressed = false;
 
-void kb_processKeycode()
+// get input from keyboard
+void kb_read(char* data) {
+    char d;
+    struct ps2ctrl_status x;
+    kb_status(&x);
+    if (x.isOutputBufferFull) {
+        inb(PS2CTRL_DATA, d)
+    }
+    *data = d;
+}
+
+// send data to keyboard
+void kb_send(char cmdbyte) {
+    outb(PS2CTRL_STAT_CMD, cmdbyte);
+}
+
+// get keyboard status
+void kb_status(struct ps2ctrl_status* stat) {
+    char statb;
+    inb(PS2CTRL_STAT_CMD, statb);
+    // unholy pointer hack because C was being pedantic about struct casting
+    *stat = *(struct ps2ctrl_status*)&statb;
+}
+
+// process input keycode
+void kb_proc()
 {
     // set shiftPressed when keycode is LSHIFT, do nothing otherwise
     shiftPressed |= (keycode == SC1_KEY_LSHIFT);
@@ -37,7 +69,7 @@ void kb_processKeycode()
 // gets called upon every IRQ1
 void kb_irq()
 {
-    ps2ctrl_readb(&keycode);
-    kb_processKeycode();
+    kb_read(&keycode);
+    kb_proc();
     pic1_ack();
 }
