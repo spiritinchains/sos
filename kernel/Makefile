@@ -1,4 +1,8 @@
 
+CC=i686-elf-gcc
+AS=nasm
+LFLAGS=-nostdlib -ffreestanding -lgcc
+
 SRC_DIR=src
 OBJ_DIR=build
 
@@ -12,13 +16,13 @@ all: bin/kernel.bin
 .PHONY: all run clean
 
 build/%.o: src/%.c | $(OBJ_DIR)
-	gcc -g -ffreestanding -m32 -Iinclude -c $< -o $@
+	$(CC) -g -ffreestanding -m32 -Iinclude -c $< -o $@
 
 build/entry.o: src/entry.asm | $(OBJ_DIR)
-	nasm -f elf32 $< -o $@
+	$(AS) -f elf32 $< -o $@
 
-bin/kernel.bin: build/entry.o $(OBJ_FILES) | $(TARGET_DIR)
-	ld -m elf_i386 -n -o bin/kernel.bin -T linker.ld build/entry.o $(OBJ_FILES)
+bin/kernel.bin: linker.ld build/entry.o $(OBJ_FILES) | $(TARGET_DIR)
+	$(CC) -T linker.ld build/entry.o $(OBJ_FILES) -o bin/kernel.bin $(LFLAGS)
 
 $(OBJ_DIR):
 	mkdir -p $@
