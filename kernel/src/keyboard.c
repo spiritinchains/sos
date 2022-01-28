@@ -2,18 +2,9 @@
 #include <kernel.h>
 
 #include <keyboard.h>
+#include <keycodes.h>
+
 #include <terminal.h>
-
-#define PS2CTRL_DATA        0x60        // PS2 Controller Data Port
-#define PS2CTRL_STAT_CMD    0x64        // Status/Command Register
-
-#define KB_RES_SELF_TEST_PASS 0xAA
-#define KB_RES_ECHO 0xEE
-#define KB_RES_ACK 0xFA
-#define KB_RES_RESEND 0xFE
-
-#define SC1_KEY_LSHIFT 0x2a
-#define SC1_RELEASE 0x80
 
 /*
  * Keyboard TODO:
@@ -24,10 +15,13 @@
 
 void pic1_ack();
 
-static uint8_t keycode;
-static bool shiftPressed = false;
+static uint8_t scancode;
+static keycode_t keycode;
+static int escapeState = 0;
 
-// get input from keyboard
+/*
+ * get scan code from keyboard
+ */
 void kb_read(char* data) {
     char d;
     struct ps2ctrl_status x;
@@ -43,7 +37,9 @@ void kb_send(char cmdbyte) {
     outb(PS2CTRL_STAT_CMD, cmdbyte);
 }
 
-// get keyboard status
+/*
+ * get keyboard status
+ */
 void kb_status(struct ps2ctrl_status* stat) {
     char statb;
     inb(PS2CTRL_STAT_CMD, statb);
@@ -51,25 +47,40 @@ void kb_status(struct ps2ctrl_status* stat) {
     *stat = *(struct ps2ctrl_status*)&statb;
 }
 
-// process input keycode
+/* 
+ * process scancode input as keycode
+ */
 void kb_proc()
 {
-    // set shiftPressed when keycode is LSHIFT, do nothing otherwise
-    shiftPressed |= (keycode == SC1_KEY_LSHIFT);
-    // unset shiftPressed when keycode is LSHIFT Released, do nothing otherwise
-    shiftPressed &= (keycode != (SC1_KEY_LSHIFT + SC1_RELEASE));
+    // convert from 'break' code to 'make' code
+    uint8_t idx = scancode & ~0x80;
     
-    // stopgap solution before real keycodes are implemented
-    if ((keycode > 0 && keycode < 58)) {
-        // vga_putc(layout_enUS[shiftPressed][keycode]);
-        term_input(keycode + (shiftPressed * 58));
+    if (!escapeState) {
+        if (scancode == 0xE0) {
+            escapeState = 1;
+        }
+        else {
+            keycode = scanset1[idx];
+        }
+    }
+    else {
+        keycode = scanset1_esc[idx];
+        escapeState = 0;
+    }
+
+    if (keycode) {
+        if (scancode & 0x80)
+            keycode = -keycode;
+        // temporary stopgap before event system implementation
+        term_input(keycode);
+        keycode = 0;
     }
 }
 
 // gets called upon every IRQ1
 void kb_irq()
 {
-    kb_read(&keycode);
+    kb_read(&scancode);
     kb_proc();
     pic1_ack();
 }

@@ -2,12 +2,13 @@
 #include <kernel.h>
 
 #include <terminal.h>
+#include <keycodes.h>
 #include <vga.h>
 
 #define TERM_COLS 80
 #define TERM_ROWS 25
 
-static char layout_enUS[2][58] = {
+static char layout[2][58] = {
     {
     '\0', '\x1b', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
     '-', '=', '\b', '\t', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p',
@@ -23,6 +24,8 @@ static char layout_enUS[2][58] = {
     }
 };
 
+static int shiftPressed = 0;
+
 void term_init() {
 	vga_clear();
 	vga_setcursor(0);
@@ -30,9 +33,18 @@ void term_init() {
 }
 
 // input keycodes from keyboard input
-void term_input(char kc) {
+void term_input(keycode_t kc) {
     // TODO: use a circular buffer
-    term_putc(layout_enUS[kc / 58][kc % 58]);
+    if (kc == KEY_LSHIFT || kc == KEY_RSHIFT) {
+        shiftPressed = 1;
+    }
+    else if (kc == -KEY_LSHIFT || kc == -KEY_RSHIFT) {
+        shiftPressed = 0;
+    }
+
+    if (kc > 0 && kc < 58) {
+        term_putc(layout[shiftPressed][kc]);
+    }
 }
 
 void term_putc(char ch)

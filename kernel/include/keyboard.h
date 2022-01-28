@@ -23,4 +23,11 @@ struct ps2ctrl_config {
     unsigned bit7 : 1;                   // Must be zero
 };
 
-// TODO: keycode stuff will go here
+#define PS2CTRL_DATA        0x60        // PS2 Controller Data Port
+#define PS2CTRL_STAT_CMD    0x64        // Status/Command Register
+
+#define KB_RES_SELF_TEST_PASS 0xAA
+#define KB_RES_ECHO 0xEE
+#define KB_RES_ACK 0xFA
+#define KB_RES_RESEND 0xFE
+
