@@ -10,3 +10,4 @@ Feature set as of right now includes:
 - printing text (limited)
 - getting keyboard input (limited)
 - manipulating vga console (limited)
+- serial input/output (limited)

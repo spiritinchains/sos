@@ -12,7 +12,14 @@ header_start:
     ; checksum
     dd -(0xe85250d6 + 0 + (header_end - header_start))
     
-    ; optional multiboot tags
+    ; request info tag
+    reqinfo_tag_start:
+    dw 1    ; type
+    dw 0    ; flags
+    dd reqinfo_tag_end - reqinfo_tag_start
+    dd 1, 4
+    reqinfo_tag_end:
+    
     ; end tag
     dw 0    ; type
     dw 0    ; flags
@@ -27,18 +34,20 @@ extern main
 start:
     cli                             ; clear interrupts
     lgdt [gdt_descriptor]
-    mov eax, cr0
-    or al, 1                        ; enable protected mode
+    mov ecx, cr0
+    or cl, 1                        ; enable protected mode
     ;or eax, (1 << 31)               ; enable paging
     ;or eax, (1 << 16)               ; enable write protection
-    mov cr0, eax
+    mov cr0, ecx
     jmp 0x08:dummylabel             ; far jump to flush cs
     dummylabel:                     ; properly set data segments
-    mov ax, 0x10
-    mov ds, ax
-    mov ss, ax
-    mov es, ax
+    mov cx, 0x10
+    mov ds, cx
+    mov ss, cx
+    mov es, cx
     mov esp, stack_top              ; set stack pointer
+    push ebx                        ; addr
+    push eax                        ; magic
     call main                       ; call entry point
     ;int 0x21
     jmp $                           ; infinite loop

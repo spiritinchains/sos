@@ -13,3 +13,6 @@
 #define outw(port, value)   asm("out %%ax, %%dx" : : "a" (value), "d" (port) );
 
 int printk(const char* format, ...);
+
+// only included for sanity checking cause I screwed up vga once
+#define debug_vga_print		*((int*)0xb8000)=0x07690748

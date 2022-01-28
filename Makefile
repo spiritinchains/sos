@@ -18,7 +18,7 @@ clean:
 	make clean -C kernel
 
 run: iso
-	qemu-system-x86_64 -cdrom os.iso
+	qemu-system-x86_64 -cdrom os.iso -serial file:serial.log
 
 debug: iso
 	qemu-system-x86_64 -cdrom os.iso -s -S

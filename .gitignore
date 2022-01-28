@@ -1,5 +1,6 @@
 .vscode
 *.iso
+*.log
 
 kernel/build/*
 kernel/bin/*
