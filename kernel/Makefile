@@ -1,6 +1,7 @@
 
 CC=i686-elf-gcc
 AS=nasm
+CFLAGS=-g -ffreestanding -m32 -Iinclude
 LFLAGS=-nostdlib -ffreestanding -lgcc
 
 SRC_DIR=src
@@ -16,7 +17,7 @@ all: bin/kernel.bin
 .PHONY: all run clean
 
 build/%.o: src/%.c | $(OBJ_DIR)
-	$(CC) -g -ffreestanding -m32 -Iinclude -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 build/entry.o: src/entry.asm | $(OBJ_DIR)
 	$(AS) -f elf32 $< -o $@

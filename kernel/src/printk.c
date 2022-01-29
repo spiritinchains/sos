@@ -1,7 +1,14 @@
 
 #include <kernel.h>
-
+#include <serial.h>
 #include <terminal.h>
+
+// TODO: use common console
+#ifndef SERIAL_CONSOLE
+	#define PUTC term_putc
+#else
+	#define PUTC serial_write
+#endif
 
 int printk(const char* fmt, ...) {
 
@@ -19,6 +26,11 @@ int printk(const char* fmt, ...) {
 				int32_t i = 0;
 				char _buf[10];
 
+				if (_arg == 0) {
+					_buf[i] = '0';
+					i++;
+				}
+
 				while (_arg) {
 					_buf[i] = (_arg % 10) + '0';
 					_arg /= 10;
@@ -27,7 +39,7 @@ int printk(const char* fmt, ...) {
 
 				while (i) {
 					i--;
-					term_putc(_buf[i]);
+					PUTC(_buf[i]);
 				}
 
 				fmt++;
@@ -38,6 +50,11 @@ int printk(const char* fmt, ...) {
 
 				int32_t i = 0;
 				char _buf[10];
+
+				if (_arg == 0) {
+					_buf[i] = '0';
+					i++;
+				}
 
 				while (_arg) {
 					_buf[i] = (_arg % 16) + '0';
@@ -50,14 +67,14 @@ int printk(const char* fmt, ...) {
 
 				while (i) {
 					i--;
-					term_putc(_buf[i]);
+					PUTC(_buf[i]);
 				}
 
 				fmt++;
 				continue;
 			}
 		}
-		term_putc(*fmt);
+		PUTC(*fmt);
 		fmt++;
 	}
 
