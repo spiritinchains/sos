@@ -24,7 +24,13 @@ static char layout[2][58] = {
     }
 };
 
+// keyboard states
 static int shiftPressed = 0;
+
+// terminal display states
+static int isEscape = 0;
+static vgacolor_t bgcolor = VGA_COLOR_BLACK;
+static vgacolor_t fgcolor = VGA_COLOR_DARK_GREY;
 
 void term_init() {
 	vga_clear();
@@ -47,31 +53,39 @@ void term_input(keycode_t kc) {
     }
 }
 
+/* Display character on screen */
 void term_putc(char ch)
 {
-	// TODO: handle special chars
     int pos;
     vga_getcursor(&pos);
+    // vga_setbg(bgcolor, pos);
+    // vga_setfg(bgcolor, pos);
 
-    if (!ch) {
-        // null byte case (ignored)
-    }
-    else if (ch == '\b') {
-        //backspace case
-        if (pos) {
-            vga_setcursor(--pos);
-            vga_setchar(' ', pos);
-        }
-    }
-    else if (ch == '\n') {
-        // newline case (carriage return implied)
-        pos += TERM_COLS;
-        pos -= pos % TERM_COLS;
-        vga_setcursor(pos);
-    }
-    else {
-        // general case
-        vga_setchar(ch, pos);
-        vga_setcursor(++pos);
+    switch (ch) {
+        case 0:
+            // null byte
+            break;
+        case '\b':
+            // backspace
+            if (pos) {
+                vga_setcursor(--pos);
+                vga_setchar(' ', pos);
+            }
+            break;
+        // case '\x1b':
+        //     // escape sequence
+        //     isEscape = 1;
+        //     break;
+        case '\n':
+            // newline + carriage return
+            pos += TERM_COLS;
+            pos -= pos % TERM_COLS;
+            vga_setcursor(pos);
+            break;
+        default:
+            // general case
+            vga_setchar(ch, pos);
+            vga_setcursor(++pos);
+            break;
     }
 }

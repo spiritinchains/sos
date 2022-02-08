@@ -36,8 +36,8 @@ start:
     lgdt [gdt_descriptor]
     mov ecx, cr0
     or cl, 1                        ; enable protected mode
-    ;or eax, (1 << 31)               ; enable paging
-    ;or eax, (1 << 16)               ; enable write protection
+    ; or eax, (1 << 31)               ; enable paging
+    ; or eax, (1 << 16)               ; enable write protection
     mov cr0, ecx
     jmp 0x08:dummylabel             ; far jump to flush cs
     dummylabel:                     ; properly set data segments

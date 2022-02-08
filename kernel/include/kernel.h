@@ -15,4 +15,4 @@
 int printk(const char* format, ...);
 
 // only included for sanity checking cause I screwed up vga once
-#define debug_vga_print		*((int*)0xb8000)=0x07690748
+#define debug_vga_print		*((uint64_t*)0xb8000)=0x0720072107690748

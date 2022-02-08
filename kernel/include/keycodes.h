@@ -8,7 +8,7 @@ typedef int16_t keycode_t;
 extern const keycode_t scanset1[];
 extern const keycode_t scanset1_esc[];
 
-/* shouldn't these be enums? */
+#define KEYS_TOTAL 127
 
 #define KEY_ESC 1
 #define KEY_1 2

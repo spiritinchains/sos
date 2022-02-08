@@ -4,78 +4,74 @@
 #include <terminal.h>
 
 // TODO: use common console
-#ifndef SERIAL_CONSOLE
-	#define PUTC term_putc
-#else
-	#define PUTC serial_write
-#endif
+#define PUTC term_putc
 
-int printk(const char* fmt, ...) {
+const char seq[] = "0123456789abcdef";
 
-	/* TODO: improve this function to be less wonky */
+bool in_fmtseq = false;
 
+void print_num(uint64_t num, int base)
+{
+	if (base > 16)
+		return;
+
+	if (num / base != 0)
+		print_num(num / base, base);
+
+	PUTC(seq[num % base]);
+	return;
+}
+
+void print_str(char* str)
+{
+	while (*str) 
+	{
+		PUTC(*str);
+		str++;
+	}
+}
+
+int printk(const char* fmt, ...) 
+{
 	va_list arg_list;
 	va_start(arg_list, fmt);
 
-	while (*fmt) {
-		if (*fmt == '%') {
+	while (*fmt) 
+	{
+		switch (*fmt) 
+		{
+		case '%':
+			in_fmtseq = true;
 			fmt++;
-			if (*fmt == 'd') {
-				uint32_t _arg = va_arg(arg_list, uint32_t);
+			break;
+		default:
+			PUTC(*fmt);
+			break;
+		}
 
-				int32_t i = 0;
-				char _buf[10];
-
-				if (_arg == 0) {
-					_buf[i] = '0';
-					i++;
-				}
-
-				while (_arg) {
-					_buf[i] = (_arg % 10) + '0';
-					_arg /= 10;
-					i++;
-				}
-
-				while (i) {
-					i--;
-					PUTC(_buf[i]);
-				}
-
-				fmt++;
-				continue;
-			}
-			else if (*fmt == 'x') {
-				uint32_t _arg = va_arg(arg_list, uint32_t);
-
-				int32_t i = 0;
-				char _buf[10];
-
-				if (_arg == 0) {
-					_buf[i] = '0';
-					i++;
-				}
-
-				while (_arg) {
-					_buf[i] = (_arg % 16) + '0';
-					if (_buf[i] > '9') {
-						_buf[i] += 7;
-					}
-					_arg /= 16;
-					i++;
-				}
-
-				while (i) {
-					i--;
-					PUTC(_buf[i]);
-				}
-
-				fmt++;
-				continue;
+		if (in_fmtseq) 
+		{
+			int n;
+			switch(*fmt) 
+			{
+			case 'd':
+				n = va_arg(arg_list, int32_t);
+				print_num(n, 10);
+				break;
+			case 'x':
+				n = va_arg(arg_list, int32_t);
+				print_num(n, 16);
+				break;
+			case 's':
+				char* s = va_arg(arg_list, char*);
+				print_str(s);
+				break;
+			default:
+				in_fmtseq = false;
+				break;
 			}
 		}
-		PUTC(*fmt);
+
 		fmt++;
 	}
-
 }
