@@ -5,9 +5,20 @@ A hobbyist's weaksauce attempt at making an operating system
 Currently includes nothing reminiscent of anything useful that you would find
 in any *real* OS
 
-Feature set as of right now includes:
+## How to build
 
-- printing text (limited)
-- getting keyboard input (limited)
-- manipulating vga console (limited)
-- serial input/output (limited)
+Simply run `make` from the project root directory.
+
+Only runs on i386. Requires [NASM](https://www.nasm.us/) to compile.
+
+## To-do
+
+- [X] getting keyboard input
+- [X] manipulating vga console
+- [X] serial input/output
+- [ ] paging and dynamic memory management
+- [ ] process management
+- [ ] filesystems
+- [ ] proper user space/kernel space separation
+- [ ] multitasking
+- [ ] ~~doom port~~
