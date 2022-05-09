@@ -35,12 +35,19 @@ start:
     cli                             ; clear interrupts
     lgdt [gdt_descriptor]
     mov ecx, cr0
-    or cl, 1                        ; enable protected mode
-    ; or eax, (1 << 31)               ; enable paging
-    ; or eax, (1 << 16)               ; enable write protection
+    or ecx, 1                       ; enable protected mode
     mov cr0, ecx
     jmp 0x08:dummylabel             ; far jump to flush cs
     dummylabel:                     ; properly set data segments
+    mov ecx, pd_start               ; set page directory address
+    mov cr3, ecx
+    mov ecx, cr0
+    or ecx, (1 << 31)               ; enable paging (set CR0.PG)
+    ; or ecx, (1 << 16)               ; enable write protection (set CR0.WP)
+    mov cr0, ecx
+    ; mov ecx, cr4
+    ; or ecx, (1 << 5)                ; set CR4.PAE (32-bit paging)
+    ; mov cr4, ecx
     mov cx, 0x10
     mov ds, cx
     mov ss, cx
@@ -53,6 +60,18 @@ start:
     jmp $                           ; infinite loop
 
 %include "src/isr.asm"
+
+section .data
+pd_start:
+dd pt1_start + 7
+times 1023 dd 0
+
+pt1_start:
+%assign i 0
+%rep    1024
+    dd (i << 12) | 7
+%assign i i+1
+%endrep
 
 section .rodata
 gdt_start:

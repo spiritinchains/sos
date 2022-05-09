@@ -1,4 +1,7 @@
 
+QEMU=qemu-system-i386
+QEMUOPTS=-cdrom os.iso -serial stdio -m 128
+
 all: kernel iso
 
 .PHONY: all kernel clean iso run debug
@@ -18,7 +21,7 @@ clean:
 	make clean -C kernel
 
 run: iso
-	qemu-system-i386 -cdrom os.iso -serial stdio
+	$(QEMU) $(QEMUOPTS)
 
 debug: iso
-	qemu-system-i386 -cdrom os.iso -serial stdio -S
+	$(QEMU) $(QEMUOPTS) -s -S
