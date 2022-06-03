@@ -1,21 +1,30 @@
 ENTRY(start)
 
+KERN_BASE = 0xC0000000;
+
 SECTIONS {
     . = 1M;
-    .boot BLOCK(4K) : ALIGN(4K) {
+    .boot ALIGN(4K) : {
         /* ensure that the multiboot header is at the beginning */
         *(.multiboot)
+        *(.entry)
     }
-    .text BLOCK(4K) : ALIGN(4K) {
+    .initstack ALIGN(4K) : {
+        *(.initstack)
+    }
+    .pagedata ALIGN(4K) : {
+        *(.pagedata)
+    }
+    .text ALIGN(4K) : {
         *(.text)
     }
-    .rodata BLOCK(4K) : ALIGN(4K) {
+    .rodata ALIGN(4K) : {
         *(.rodata)
     }
-    .data BLOCK(4K) : ALIGN(4K) {
+    .data ALIGN(4K) : {
         *(.data)
     }
-    .bss BLOCK(4K) : ALIGN(4K) {
+    .bss ALIGN(4K) : {
         *(.COMMON)
         *(.bss)
     }

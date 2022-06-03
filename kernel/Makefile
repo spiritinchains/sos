@@ -1,7 +1,7 @@
 
 CC=i686-elf-gcc
 AS=nasm
-CFLAGS=-g -ffreestanding -m32 -Iinclude
+CFLAGS=-g -ffreestanding -m32 -mgeneral-regs-only -Iinclude
 LFLAGS=-nostdlib -ffreestanding -lgcc
 
 SRC_DIR=src

@@ -62,11 +62,11 @@ int main(uint32_t magic, void* addr)
 	idt_init();
 	term_init();
 	serial_init();
+
 	multiboot_getinfo(addr);
 
 	printk("\n\nmain at 0x%x\n", &main);
 	// printk("addr: %x, magic: %x\n", addr, magic);
-
 
 	printk("OK");
 
