@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <keycodes.h>
+#include "keycodes.h"
 
 void term_init();
 void term_putc(char);

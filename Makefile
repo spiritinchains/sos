@@ -9,7 +9,7 @@ all: kernel iso
 kernel:
 	make -C kernel
 
-iso: kernel
+iso: kernel iso/boot/grub/grub.cfg
 	cp kernel/bin/kernel.bin iso/boot/kernel.bin
 	grub-mkrescue -o os.iso -d /usr/lib/grub/i386-pc iso
 

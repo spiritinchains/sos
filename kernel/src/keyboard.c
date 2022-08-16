@@ -1,10 +1,10 @@
 
 #include <kernel.h>
 
-#include <keyboard.h>
-#include <keycodes.h>
+#include "keyboard.h"
+#include "keycodes.h"
 
-#include <terminal.h>
+#include "terminal.h"
 
 /*
  * Keyboard TODO:
@@ -72,7 +72,7 @@ void kb_proc()
         if (scancode & 0x80)
             keycode = -keycode;
         // temporary stopgap before event system implementation
-        term_input(keycode);
+        // term_input(keycode);
         keycode = 0;
     }
 }

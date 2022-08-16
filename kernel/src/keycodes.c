@@ -1,5 +1,5 @@
 
-#include <keycodes.h>
+#include "keycodes.h"
 
 const keycode_t scanset1[] = {
     [0x1] = KEY_ESC,

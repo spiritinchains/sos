@@ -1,6 +1,6 @@
 ENTRY(start)
 
-KERN_BASE = 0xC0000000;
+_KERN_BASE = 0xC0000000;
 
 SECTIONS {
     . = 1M;
@@ -8,12 +8,7 @@ SECTIONS {
         /* ensure that the multiboot header is at the beginning */
         *(.multiboot)
         *(.entry)
-    }
-    .initstack ALIGN(4K) : {
-        *(.initstack)
-    }
-    .pagedata ALIGN(4K) : {
-        *(.pagedata)
+        *(.bstack)
     }
     .text ALIGN(4K) : {
         *(.text)
@@ -28,5 +23,7 @@ SECTIONS {
         *(.COMMON)
         *(.bss)
     }
+    . = ALIGN(4K);
+    _KERNEL_END = .;
 }
 

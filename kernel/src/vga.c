@@ -1,7 +1,7 @@
 
 #include <kernel.h>
 
-#include <vga.h>
+#include "vga.h"
 
 static vgach_t* VGA_BUFFER = (vgach_t*)VGA_BUFFER_ADDR;
 

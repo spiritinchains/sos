@@ -1,9 +1,9 @@
 
 #include <kernel.h>
 
-#include <terminal.h>
-#include <keycodes.h>
-#include <vga.h>
+#include "terminal.h"
+#include "keycodes.h"
+#include "vga.h"
 
 #define TERM_COLS 80
 #define TERM_ROWS 25

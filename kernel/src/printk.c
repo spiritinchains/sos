@@ -1,14 +1,13 @@
 
 #include <kernel.h>
-#include <serial.h>
-#include <terminal.h>
+
+#include "serial.h"
+#include "terminal.h"
 
 // TODO: use common console
-#define PUTC term_putc
+#define printk_putc serial_write
 
 const char seq[] = "0123456789abcdef";
-
-bool in_fmtseq = false;
 
 void print_num(uint64_t num, int base)
 {
@@ -18,7 +17,7 @@ void print_num(uint64_t num, int base)
 	if (num / base != 0)
 		print_num(num / base, base);
 
-	PUTC(seq[num % base]);
+	printk_putc(seq[num % base]);
 	return;
 }
 
@@ -26,7 +25,7 @@ void print_str(char* str)
 {
 	while (*str) 
 	{
-		PUTC(*str);
+		printk_putc(*str);
 		str++;
 	}
 }
@@ -35,6 +34,7 @@ int printk(const char* fmt, ...)
 {
 	va_list arg_list;
 	va_start(arg_list, fmt);
+	bool in_fmtseq = false;
 
 	while (*fmt) 
 	{
@@ -45,27 +45,34 @@ int printk(const char* fmt, ...)
 			fmt++;
 			break;
 		default:
-			PUTC(*fmt);
+			printk_putc(*fmt);
 			break;
 		}
 
 		if (in_fmtseq) 
 		{
-			int n;
 			switch(*fmt) 
 			{
 			case 'd':
-				n = va_arg(arg_list, int32_t);
+			{
+				int32_t n;
+				n = va_arg(arg_list, int64_t);
 				print_num(n, 10);
 				break;
+			}
 			case 'x':
-				n = va_arg(arg_list, int32_t);
+			{
+				uint32_t n;
+				n = va_arg(arg_list, uint64_t);
 				print_num(n, 16);
 				break;
+			}
 			case 's':
+			{
 				char* s = va_arg(arg_list, char*);
 				print_str(s);
 				break;
+			}
 			default:
 				in_fmtseq = false;
 				break;

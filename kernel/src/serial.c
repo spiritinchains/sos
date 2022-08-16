@@ -1,6 +1,7 @@
 
 #include <kernel.h>
-#include <serial.h>
+
+#include "serial.h"
 
 void serial_init() {
     outb((COM1 + SERIAL_INT_ENABLE), 0x00);

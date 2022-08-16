@@ -3,7 +3,6 @@ bits 32
 section .multiboot
 
 align 8
-
 header_start:
     dd 0xe85250d6                   ; magic number
     dd 0                            ; architecture 0 (i386)
@@ -17,8 +16,22 @@ header_start:
     dw 1    ; type
     dw 0    ; flags
     dd reqinfo_tag_end - reqinfo_tag_start
-    dd 1, 4
+    dd 1, 4, 6, 7, 8
     reqinfo_tag_end:
+
+    align 8
+
+    ; ; framebuffer tag
+    ; fb_tag_start:
+    ; dw 5    ; type
+    ; dw 0    ; flags
+    ; dd 20   ; size
+    ; dd 0    ; width
+    ; dd 0    ; height
+    ; dd 0    ; depth
+    ; fb_tag_end:
+
+    align 8
     
     ; end tag
     dw 0    ; type
@@ -46,25 +59,25 @@ start:
     mov ss, cx
     mov es, cx
 
-    ; paging
-    mov ecx, pd_start               ; set page directory address
-    mov cr3, ecx
-    mov ecx, pt1_start              ; point first page directory to first page table
-    or ecx, 7                       ; set flags
-    mov [pd_start], ecx
-    mov ecx, pt1_start              ; point 0x300th page directory to second page table (0xC00...)
-    or ecx, 7
-    mov [pd_start+0xC00], ecx
-    ; 0xC0000000-0xC03FFFFF is a mirror of 0x00000000-0x003FFFFF
+    ; ; paging
+    ; mov ecx, pd_start               ; set page directory address
+    ; mov cr3, ecx
+    ; mov ecx, pt1_start              ; point first page directory to first page table
+    ; or ecx, 7                       ; set flags
+    ; mov [pd_start], ecx
+    ; mov ecx, pt1_start              ; point 0x300th page directory to second page table (0xC00...)
+    ; or ecx, 7
+    ; mov [pd_start+0xC00], ecx
+    ; ; 0xC0000000-0xC03FFFFF is a mirror of 0x00000000-0x003FFFFF
 
-    mov ecx, cr0
-    or ecx, (1 << 31)               ; enable paging (set CR0.PG)
-    ; or ecx, (1 << 16)               ; enable write protection (set CR0.WP)
-    mov cr0, ecx
-    ; mov ecx, cr4
-    ; or ecx, (1 << 4)                ; set CR4.PSE (Page size extension)
-    ; or ecx, (1 << 5)                ; set CR4.PAE (32-bit paging)
-    ; mov cr4, ecx
+    ; mov ecx, cr0
+    ; or ecx, (1 << 31)               ; enable paging (set CR0.PG)
+    ; ; or ecx, (1 << 16)               ; enable write protection (set CR0.WP)
+    ; mov cr0, ecx
+    ; ; mov ecx, cr4
+    ; ; or ecx, (1 << 4)                ; set CR4.PSE (Page size extension)
+    ; ; or ecx, (1 << 5)                ; set CR4.PAE (32-bit paging)
+    ; ; mov cr4, ecx
 
     mov esp, stack_top              ; set stack pointer
     push ebx                        ; addr
@@ -72,19 +85,6 @@ start:
     call main                       ; call entry point
     ;int 0x21
     jmp $                           ; infinite loop
-
-section .data
-pd_start:
-    times 1024 dd 0
-
-; page table 1
-; maps physical page 0x00000-0x003FF to virtual page 0x00000-0x003FF
-pt1_start:
-    %assign i 0
-    %rep    1024
-        dd (i << 12) | 7
-        %assign i i+1
-    %endrep
 
 section .rodata
 gdt_start:
@@ -115,9 +115,10 @@ gdt_descriptor:
     dw gdt_end - gdt_start - 1  ; size of gdt
     dd gdt_start                ; address of gdt
 
-section .initstack
+section .bstack
 
 ; stack memory space
 stack_bottom:
-    resb 65536
+    resb 16*1024               ; 16K
 stack_top:
+
