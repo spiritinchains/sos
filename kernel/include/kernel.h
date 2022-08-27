@@ -15,6 +15,9 @@
 int printk(const char* format, ...);
 
 void* kmemcpy(void* dest, const void* src, size_t n);
+size_t kstrlen(const char* str);
+int kstrncmp(const char* s1, const char* s2, size_t num);
+int kstrcmp(const char* s1, const char* s2);
 
 void* kmalloc(size_t size);
 void kfree(void* mem);

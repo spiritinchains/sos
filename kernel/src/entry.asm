@@ -170,6 +170,6 @@ section .stack
 
 ; stack memory space
 stack_bottom:
-    resb 16*1024               ; 16K
+    resb 256*1024               ; 256K
 stack_top:
 
