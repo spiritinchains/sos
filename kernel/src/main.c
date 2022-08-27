@@ -4,6 +4,7 @@
 
 #include "terminal.h"
 #include "serial.h"
+#include "vmm.h"
 
 void idt_init();
 
@@ -47,7 +48,7 @@ void multiboot_getinfo(void* addr)
 
 void print_mmap_entry(struct multiboot_mmap_entry* entry)
 {
-	printk("Range: 0x%x-0x%x\n", entry->addr, entry->addr + entry->len);
+	printk("Range: 0x%x-0x%x\n", (uint32_t)entry->addr, (uint32_t)(entry->addr + entry->len));
 	
 	printk("Length: %d\n", entry->len);
 
@@ -78,7 +79,7 @@ void print_mmap_entry(struct multiboot_mmap_entry* entry)
 
 void print_mmap_info(struct multiboot_tag_mmap* mmap)
 {
-	printk("entries: 0x%x\n", mmap->entries);
+	printk("entries_addr: 0x%x\n", mmap->entries);
 	printk("entry_size: %d\n", mmap->entry_size);
 	printk("entry_version: %d\n", mmap->entry_version);
 	printk("size: %d\n", mmap->size);
@@ -92,28 +93,38 @@ void print_mmap_info(struct multiboot_tag_mmap* mmap)
 	}
 }
 
-int main(uint32_t magic, void* addr) 
+int kmain(uint32_t magic, void* addr) 
 {
 	if (magic != MULTIBOOT2_BOOTLOADER_MAGIC)
 		return -1;
 
 	multiboot_getinfo(addr);
 
-	extern uintptr_t _KERNEL_END;
+	extern uintptr_t _kern_end, _kdata_start, _kdata_end;
 
 	idt_init();
 	serial_init();
 
-	// uint32_t* fb = (uint32_t*)tag_mfbi->common.framebuffer_addr;
+	uint32_t* fb = (uint32_t*)tag_mfbi->common.framebuffer_addr;
 
-	printk("\n\nmain at 0x%x\n", &main);
-	printk("addr: %x, magic: %x\n", addr, magic);
-	// printk("framebuffer at 0x%x\n", fb);
-	printk("\nmemory:\n");
-	print_mmap_info(tag_mmap);
+	printk("\n\nmain at 0x%x\n", &kmain);
+	printk("addr: 0x%x, size: %d\n", addr, *(uint32_t*)addr);
+	printk("framebuffer at 0x%x\n", fb);
+	printk("Start of Kernel Data: 0x%x\n", &_kdata_start);
+	printk("End of Kernel Data: 0x%x\n", &_kdata_end);
+	printk("End of Kernel: 0x%x\n", &_kern_end);
 
-	printk("End of Kernel: 0x%x\n", &_KERNEL_END);
+	// printk("\nmemory:\n");
+	// print_mmap_info(tag_mmap);
+	// void* a = kmalloc(144);
+	// kfree(a);
+
+	vmm_init();
+
 	printk("OK\n");
+
+	// this causes a page fault
+	//*(uint32_t*)0xdeadc0de = 69;
 
 	return 0;
 }

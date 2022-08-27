@@ -44,6 +44,10 @@ int printk(const char* fmt, ...)
 			in_fmtseq = true;
 			fmt++;
 			break;
+		case '\n':
+			printk_putc('\r');
+			printk_putc('\n');
+			break;
 		default:
 			printk_putc(*fmt);
 			break;
@@ -56,14 +60,14 @@ int printk(const char* fmt, ...)
 			case 'd':
 			{
 				int32_t n;
-				n = va_arg(arg_list, int64_t);
+				n = va_arg(arg_list, int32_t);
 				print_num(n, 10);
 				break;
 			}
 			case 'x':
 			{
 				uint32_t n;
-				n = va_arg(arg_list, uint64_t);
+				n = va_arg(arg_list, uint32_t);
 				print_num(n, 16);
 				break;
 			}

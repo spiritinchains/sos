@@ -1,6 +1,8 @@
 
 #include <kernel.h>
 
+#include "vmm.h"
+
 #define PIC1_CMD 0x20
 #define PIC2_CMD 0xA0
 #define PIC1_DAT 0x21
@@ -190,19 +192,30 @@ isr13(struct interrupt_frame* frame, uint32_t error_code)
 {
     // General protection fault #GP
     printk(excmsg[13]);
+    printk("General Protection Fault\n");
+    printk("EIP: %x\n", frame->EIP);
+    printk("Flags: %x\n", error_code);
 }
 
 ISR void
 isr14(struct interrupt_frame* frame, uint32_t error_code)
 {
     // Page fault #PF
+    // cr2 = address accessed that caused fault
+    uintptr_t addr;
+    __asm__("mov %%cr2, %0" : "=r" (addr));
+
+    uint32_t e_pdi, e_pti, e_offset;
+
     printk(excmsg[14]);
     printk("Page fault\n");
     printk("EIP: %x\n", frame->EIP);
     printk("Flags: %x\n", error_code);
-    uint32_t addr;
-    __asm__("mov %%cr3, %0" : "=r" (addr));
-    printk("Address %x\n", addr);
+    printk("Address: %x\n", addr);
+    printk("Physical Address: %x\n", get_physical_address(addr));
+
+    // temporary debugging hack
+    while (true) { }
 }
 
 ISR void

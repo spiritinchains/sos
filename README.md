@@ -16,7 +16,7 @@ Only runs on i386. Requires [NASM](https://www.nasm.us/) to compile.
 - [X] getting keyboard input
 - [X] manipulating vga console
 - [X] serial input/output
-- [ ] paging and dynamic memory management
+- [X] paging and dynamic memory management
 - [ ] process management
 - [ ] filesystems
 - [ ] proper user space/kernel space separation

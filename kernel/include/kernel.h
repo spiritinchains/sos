@@ -14,5 +14,10 @@
 
 int printk(const char* format, ...);
 
+void* kmemcpy(void* dest, const void* src, size_t n);
+
+void* kmalloc(size_t size);
+void kfree(void* mem);
+
 // only included for sanity checking cause I screwed up vga once
 #define debug_vga_print		*((uint64_t*)0xb8000)=0x0720072107690748

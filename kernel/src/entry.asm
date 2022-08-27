@@ -42,7 +42,8 @@ header_end:
 section .entry
 global start
 
-extern main
+extern kmain
+extern _kern_end_load
 
 start:
     cli                             ; clear interrupts
@@ -59,34 +60,65 @@ start:
     mov ss, cx
     mov es, cx
 
-    ; ; paging
-    ; mov ecx, pd_start               ; set page directory address
-    ; mov cr3, ecx
-    ; mov ecx, pt1_start              ; point first page directory to first page table
-    ; or ecx, 7                       ; set flags
-    ; mov [pd_start], ecx
-    ; mov ecx, pt1_start              ; point 0x300th page directory to second page table (0xC00...)
-    ; or ecx, 7
-    ; mov [pd_start+0xC00], ecx
-    ; ; 0xC0000000-0xC03FFFFF is a mirror of 0x00000000-0x003FFFFF
+    ; move multiboot structs to safe location
+    mov edi, 0
+    .loop1:
+    mov dl, [ebx+edi]
+    mov [multiboot_data+edi], dl
+    inc edi
+    cmp edi, [ebx]                  ; multiboot data size
+    jl .loop1
+    lea ebx, [multiboot_data]
 
-    ; mov ecx, cr0
-    ; or ecx, (1 << 31)               ; enable paging (set CR0.PG)
-    ; ; or ecx, (1 << 16)               ; enable write protection (set CR0.WP)
-    ; mov cr0, ecx
-    ; ; mov ecx, cr4
-    ; ; or ecx, (1 << 4)                ; set CR4.PSE (Page size extension)
-    ; ; or ecx, (1 << 5)                ; set CR4.PAE (32-bit paging)
-    ; ; mov cr4, ecx
+    ;; paging
+
+    ; map page directory entries to page tables in kernelspace
+    mov ecx, kernel_page_tables
+    mov edi, kernel_page_dir + (768*4)
+    .loop2:
+    mov edx, ecx
+    or edx, 7
+    mov [edi], edx
+    add edi, 4
+    add ecx, 4096
+    cmp ecx, kernel_page_tables_end
+    jl .loop2
+
+    ; set up page tables
+    mov ecx, 0x400003               ; pte value
+    mov edi, kernel_page_tables
+    .loop3:
+    mov [edi], ecx
+    add edi, 4
+    add ecx, 4096
+    cmp ecx, _kern_end_load
+    jl .loop3
+
+    ; set up registers
+    mov ecx, kernel_page_dir        ; set page directory address
+    mov cr3, ecx
+
+    mov ecx, cr4
+    or ecx, (1 << 4)                ; set CR4.PSE (Page size extension)
+    ; or ecx, (1 << 5)                ; set CR4.PAE (32-bit paging)
+    mov cr4, ecx
+
+    mov ecx, cr0
+    or ecx, (1 << 31)               ; enable paging (set CR0.PG)
+    ; or ecx, (1 << 16)               ; enable write protection (set CR0.WP)
+    mov cr0, ecx
 
     mov esp, stack_top              ; set stack pointer
     push ebx                        ; addr
     push eax                        ; magic
-    call main                       ; call entry point
+    call kmain                      ; call entry point
     ;int 0x21
     jmp $                           ; infinite loop
 
-section .rodata
+section .kdata
+
+align 4096
+
 gdt_start:
 
     gdt_null:       ; null descriptor
@@ -115,7 +147,26 @@ gdt_descriptor:
     dw gdt_end - gdt_start - 1  ; size of gdt
     dd gdt_start                ; address of gdt
 
-section .bstack
+align 4096
+
+kernel_page_dir:
+    dd 0x00000087               ; identity map first 4MB
+    ; user pages
+    times 767 dd 0              ; pad until entry 768 (0xC00xxxx)
+    ; kernel pages
+    dd 0x00400087               ; map 2nd 4MB to 0xC0000000
+    times 254 dd 0              ; pad until last entry
+    ; recursive map
+    dd kernel_page_dir + 7
+
+kernel_page_tables:
+resb 255 * 4096                 ; 255 kernel-space pages pre-allocated
+kernel_page_tables_end:
+
+multiboot_data:
+resb 8192                       ; size reserved for multiboot tags
+
+section .stack
 
 ; stack memory space
 stack_bottom:
