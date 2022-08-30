@@ -1,6 +1,6 @@
 
 QEMU=qemu-system-i386
-QEMUOPTS=-cdrom os.iso -serial stdio -m 128 -d int,cpu_reset -no-reboot
+QEMUOPTS=-cdrom os.iso -serial stdio -m 128 -d int,cpu_reset
 
 all: kernel iso
 

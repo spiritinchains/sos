@@ -21,15 +21,15 @@ header_start:
 
     align 8
 
-    ; ; framebuffer tag
-    ; fb_tag_start:
-    ; dw 5    ; type
-    ; dw 0    ; flags
-    ; dd 20   ; size
-    ; dd 0    ; width
-    ; dd 0    ; height
-    ; dd 0    ; depth
-    ; fb_tag_end:
+    ; framebuffer tag
+    fb_tag_start:
+    dw 5    ; type
+    dw 0    ; flags
+    dd 20   ; size
+    dd 0    ; width
+    dd 0    ; height
+    dd 0    ; depth
+    fb_tag_end:
 
     align 8
     
