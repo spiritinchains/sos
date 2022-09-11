@@ -6,8 +6,15 @@
 #include "serial.h"
 #include "vmm.h"
 
+extern uint64_t timer_ticks;
+
 void multiboot_getinfo(void* addr);
+
 void idt_init();
+void graphics_init();
+void timer_init();
+
+void image_draw(void* img, uint32_t x, uint32_t y);
 
 // very primitive interactive prompt for minor stuff
 void prompt()
@@ -43,6 +50,10 @@ void prompt()
 			{
 				printk("pong\n");
 			}
+			else if (kstrncmp(buf, "ticks", 5) == 0)
+			{
+				printk("ticks: %d\n", timer_ticks);
+			}
 			printk(PS);
 		}
 	}
@@ -59,6 +70,7 @@ int kmain(uint32_t magic, void* addr)
 
 	idt_init();
 	serial_init();
+	timer_init();
 
 	printk("\n\nmain at 0x%x\n", &kmain);
 	printk("addr: 0x%x, size: %d\n", addr, *(uint32_t*)addr);
@@ -73,11 +85,15 @@ int kmain(uint32_t magic, void* addr)
 	// kfree(a);
 
 	vmm_init();
+	graphics_init();
 
 	printk("OK\n");
 
 	// this causes a page fault
 	//*(uint32_t*)0xdeadc0de = 69;
+
+	extern uintptr_t sos_splash_indexed;
+	image_draw(&sos_splash_indexed, 0, 0);
 
 	prompt();
 

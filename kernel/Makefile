@@ -22,8 +22,11 @@ build/%.o: src/%.c | $(OBJ_DIR)
 build/entry.o: src/entry.asm | $(OBJ_DIR)
 	$(AS) -f elf32 $< -o $@
 
-bin/kernel.bin: linker.ld build/entry.o $(OBJ_FILES) | $(TARGET_DIR)
-	$(CC) -T linker.ld build/entry.o $(OBJ_FILES) -o bin/kernel.bin $(LFLAGS)
+build/res.o: res/res.asm
+	$(AS) -f elf32 $< -o $@
+
+bin/kernel.bin: linker.ld build/entry.o build/res.o $(OBJ_FILES) | $(TARGET_DIR)
+	$(CC) -T linker.ld build/entry.o build/res.o $(OBJ_FILES) -o bin/kernel.bin $(LFLAGS)
 
 $(OBJ_DIR):
 	mkdir -p $@

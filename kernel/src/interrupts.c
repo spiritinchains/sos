@@ -52,6 +52,7 @@ struct interrupt_frame {
 
 
 extern void kb_irq();
+extern void timer_irq();
 
 // NOTE: handle errors better (blue screen of death for unrecoverables?)
 // for now just print text
@@ -337,6 +338,12 @@ isr31(struct interrupt_frame* frame)
     printk(excmsg[31]);
 }
 
+ISR void
+isr32(struct interrupt_frame* frame)
+{
+    timer_irq();
+}
+
 ISR void 
 isr33(struct interrupt_frame* frame)
 {
@@ -364,7 +371,7 @@ void pic_init() {
     outb(PIC2_DAT, 0x01);
 
     // Masking
-    outb(PIC1_DAT, 0xFD);
+    outb(PIC1_DAT, 0xFC);
     outb(PIC2_DAT, 0xFF);
 
     // EOI
@@ -438,6 +445,7 @@ void idt_init() {
     setoffset(isr30, 30);
     setoffset(isr31, 31);
     // irqs
+    setoffset(isr32, 32);
     setoffset(isr33, 33);
     
     // initialize descriptor
