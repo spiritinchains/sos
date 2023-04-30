@@ -1,6 +1,7 @@
 .vscode
 *.iso
 *.log
+*.qcow
 
 kernel/build/
 kernel/bin/

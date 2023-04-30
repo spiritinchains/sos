@@ -11,6 +11,7 @@ SECTIONS {
         *(.entry)
     }
 
+    . = 2M;
     .kdata ALIGN(4K) : {
         _kdata_start = .;
         /* kernel data structures (paging etc) */
@@ -19,7 +20,6 @@ SECTIONS {
     }
 
     . = _KERN_BASE;
-
     .text ALIGN(4K) : AT(ADDR(.text) - _KERN_LOAD_OFFSET) {
         *(.text)
     }

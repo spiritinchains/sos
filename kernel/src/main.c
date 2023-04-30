@@ -92,8 +92,10 @@ int kmain(uint32_t magic, void* addr)
 	// this causes a page fault
 	//*(uint32_t*)0xdeadc0de = 69;
 
-	extern uintptr_t sos_splash_indexed;
-	image_draw(&sos_splash_indexed, 0, 0);
+	// extern uintptr_t sos_splash_indexed;
+	// image_draw(&sos_splash_indexed, 0, 0);
+
+	print_modules();
 
 	prompt();
 

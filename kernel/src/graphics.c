@@ -10,7 +10,7 @@ struct vbe_table
     uint16_t set_disp_start;
     uint16_t set_primary_palette;
     uint16_t ports_memory;
-} vbetable;
+}__attribute__((packed)) *vtab;
 
 struct graphics_info
 {
@@ -51,8 +51,21 @@ void graphics_init()
     extern struct multiboot_tag_vbe* tag_mvbe;
     extern struct multiboot_tag_framebuffer* tag_mfbi;
 
-    uintptr_t vbetable_addr = (tag_mvbe->vbe_interface_seg << 4) + tag_mvbe->vbe_interface_off;
-    kmemcpy(&vbetable, vbetable_addr, tag_mvbe->vbe_interface_len);
+    printk("\n---- Graphics ----\n");
+
+    printk("Framebuffer: %x\n", (uint32_t)tag_mfbi->common.framebuffer_addr);
+
+    uintptr_t vtab_addr;
+    vtab_addr = (tag_mvbe->vbe_interface_seg << 4) + tag_mvbe->vbe_interface_off;
+    vtab = vtab_addr & 0xFFFFF;
+
+    printk("VBE address: %x\n", (uint32_t)vtab);
+    printk("VBE length: %d\n", (uint32_t)tag_mvbe->vbe_interface_len);
+
+    printk("%x\n", (uint32_t)(vtab->set_window));
+    printk("%x\n", (uint32_t)(vtab->set_disp_start));
+    printk("%x\n", (uint32_t)(vtab->set_primary_palette));
+    printk("%x\n", (uint32_t)(vtab->ports_memory));
 
     gfxinfo.height = tag_mfbi->common.framebuffer_height;
     gfxinfo.width = tag_mfbi->common.framebuffer_width;
@@ -151,4 +164,6 @@ void image_draw(void* img, uint32_t x, uint32_t y)
             }
         }
     }
+
+    if (colormap) kfree(colormap);
 }

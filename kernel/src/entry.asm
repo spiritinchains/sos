@@ -16,7 +16,7 @@ header_start:
     dw 1    ; type
     dw 0    ; flags
     dd reqinfo_tag_end - reqinfo_tag_start
-    dd 1, 4, 6, 7, 8
+    dd 1, 3, 4, 6, 7, 8
     reqinfo_tag_end:
 
     align 8

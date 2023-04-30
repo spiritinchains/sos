@@ -7,8 +7,14 @@ struct multiboot_tag_string*		tag_marg = NULL;
 struct multiboot_tag_vbe*			tag_mvbe = NULL;
 struct multiboot_tag_framebuffer*	tag_mfbi = NULL;
 
+struct module {
+	struct multiboot_tag_module* node;
+	struct module* next;
+} modules_root;
+
 void multiboot_getinfo(void* addr)
 {
+	struct module* mod = &modules_root;
 	size_t mbi_size = *(uint32_t*)addr;
 	size_t i = 8;
 	while (i < mbi_size) {
@@ -27,6 +33,12 @@ void multiboot_getinfo(void* addr)
 				break;
 			case MULTIBOOT_TAG_TYPE_FRAMEBUFFER:
 				tag_mfbi = (struct multiboot_tag_framebuffer*)curtag;
+				break;
+			case MULTIBOOT_TAG_TYPE_MODULE:
+				mod->node = (struct multiboot_tag_module*)curtag;
+				mod->next = kmalloc(sizeof(struct module));
+				mod = mod->next;
+				mod->next = NULL;
 				break;
 			case MULTIBOOT_TAG_TYPE_END:
 				break;
@@ -87,3 +99,14 @@ void print_mmap_info(struct multiboot_tag_mmap* mmap)
 	}
 }
 
+void print_modules()
+{
+	struct module *mod = &modules_root;
+	while (mod != NULL)
+	{
+		struct multiboot_tag_module* x = mod->node;
+		printk("String: %s\n", x->cmdline);
+		printk("Start: %x, End: %x\n\n", x->mod_start, x->mod_end);
+		mod = mod->next;
+	}
+}
