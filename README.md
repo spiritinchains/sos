@@ -12,4 +12,5 @@ Undergoing rewrite - check back in roughly 149 years for progress
 - [ ] filesystems
 - [ ] proper user space/kernel space separation
 - [ ] multitasking
+- [ ] graphics
 - [ ] ~~doom port~~
