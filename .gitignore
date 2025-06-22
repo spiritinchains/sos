@@ -1,10 +1,2 @@
-.vscode
+.vscode/
 *.log
-
-dist/
-
-boot/bin/
-boot/build/
-
-kernel/build/
-kernel/bin/
