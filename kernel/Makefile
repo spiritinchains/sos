@@ -1,6 +1,8 @@
 
 PREFIX=x86_64-elf
 CC=$(PREFIX)-gcc
+AS=$(PREFIX)-as
+LD=$(PREFIX)-ld
 
 CFLAGS=-ffreestanding -mgeneral-regs-only -Wall -Werror
 LFLAGS=-nostdlib -ffreestanding -lgcc
