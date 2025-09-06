@@ -1,5 +1,6 @@
 #include "common.h"
 #include "interrupts.h"
+#include "apic.h"
 
 /*
  * x86_64 defines the first 32 interrupts for processor traps, faults and exceptions.
@@ -61,71 +62,22 @@ ISR void isr_dummy();
 
 static struct idt_descriptor {
     uint16_t size;
-    uint32_t base;
+    uint64_t base;
 }__attribute__((packed)); IDTR;
 
 struct idt_entry {
-    uint16_t offset_l;          // lower 16 bits of code offset
+    uint16_t offset_0_15;       // Code offset bits 0-15
     uint16_t selector;          // Segment selector for destination code segment
-    unsigned reserved   : 5;
+    unsigned IST        : 5;    // Interrupt Stack Table
     unsigned bits_5_7   : 3;    // Always 0 for Interrupt and Trap gates
-    unsigned gate_type  : 2;    // 01 - Task Gate, 10 - Interrupt Gate, 11 - Trap Gate
-    unsigned bit_10     : 1;    // always 1
-    unsigned D          : 1;    // gate size (1 if 32-bit, 0 if 16-bit)
+    unsigned gate_type  : 4;    // 1110: interrupt gate, 1111: trap gate
     unsigned bit_12     : 1;    // always 0
     unsigned DPL        : 2;    // Descriptor Privilege Level
     unsigned P          : 1;    // Segment Present
-    uint16_t offset_h           // higher 16 bits of code offset
-    //                    64 bits total
+    uint16_t offset_16_31;      // Code offset bits 16-31
+    uint32_t offset_32_63;      // Code offset bits 32-64
+    uint32_t reserved;
 }__attribute__((packed));
-
-struct interrupt_frame {
-    uint32_t EIP;
-    uint32_t CS;
-    uint32_t EFLAGS;
-}__attribute__((packed));
-
-#define IDT_ENTRY_TASK_GATE(isr) \
-    (struct idt_entry) {\
-        .reserved = 0,\
-        .bits_5_7 = 0,\
-        .gate_type = 1,\
-        .bit_10 = 1,\
-        .D = 1,\
-        .bit_12 = 0,\
-        .DPL = 0,\
-        .P = 1,\
-        .selector = 0x8,\
-        .offset_h = (((uint32_t) isr) >> 16) & 0xFFFF,\
-        .offset_l = ((uint32_t) isr) & 0xFFFF,}
-
-#define IDT_ENTRY_INTR_GATE(isr) \
-    (struct idt_entry) {\
-        .reserved = 0,\
-        .bits_5_7 = 0,\
-        .gate_type = 2,\
-        .bit_10 = 1,\
-        .D = 1,\
-        .bit_12 = 0,\
-        .DPL = 0,\
-        .P = 1,\
-        .selector = 0x8,\
-        .offset_h = (((uint32_t) isr) >> 16) & 0xFFFF,\
-        .offset_l = ((uint32_t) isr) & 0xFFFF,}
-
-#define IDT_ENTRY_TRAP_GATE(isr) \
-    (struct idt_entry) {\
-        .reserved = 0,\
-        .bits_5_7 = 0,\
-        .gate_type = 3,\
-        .bit_10 = 1,\
-        .D = 1,\
-        .bit_12 = 0,\
-        .DPL = 0,\
-        .P = 1,\
-        .selector = 0x8,\
-        .offset_h = (((uint32_t) isr) >> 16) & 0xFFFF,\
-        .offset_l = ((uint32_t) isr) & 0xFFFF,}
 
 static void (*s_intr_callback[256])(uint8_t) = {};
 
@@ -134,6 +86,7 @@ static struct idt_entry IDT[256] = {};
 void interrupts_init(void)
 {
     // Initialize Interrupt Controller
+    pic_8259a_init();
 
     // Initialize Interrupt Descriptor Table
     IDTR.size = sizeof(IDT);
@@ -142,6 +95,15 @@ void interrupts_init(void)
 
 void interrupts_set_callback(uint8_t index, void (*callback)(uint8_t))
 {
+    s_intr_callback[index] = callback;
+}
+
+void interrupts_exec_callback(uint8_t index)
+{
+    if (s_intr_callback[index])
+    {
+        s_intr_callback[index](index);
+    }
 }
 
 ISR void isr_dummy()
