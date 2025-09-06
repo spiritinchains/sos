@@ -1,4 +1,4 @@
-
+ARCH=x86_64
 PREFIX=x86_64-elf
 CC=$(PREFIX)-gcc
 AS=$(PREFIX)-as
@@ -7,7 +7,7 @@ LD=$(PREFIX)-ld
 CFLAGS=-ffreestanding -mgeneral-regs-only -Wall -Werror
 LFLAGS=-nostdlib -ffreestanding -lgcc
 
-SRC_FILES=$(wildcard common/*.c)
+SRC_FILES=$(wildcard common/*.c) arch/$(ARCH)/serial.c
 OBJ_FILES=$(patsubst %.c, build/%.o, $(SRC_FILES))
 
 OUTPUT_FILE=build/kernel.elf
