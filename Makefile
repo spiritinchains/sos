@@ -25,4 +25,4 @@ dist/sos.iso: boot kernel
 	cp -v boot/limine/BOOTIA32.EFI iso/EFI/BOOT/
 	bash mkiso.sh
 
-.PHONY: all kernel clean
+.PHONY: all boot kernel clean

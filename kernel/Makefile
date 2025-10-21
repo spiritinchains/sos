@@ -4,7 +4,8 @@ CC=$(PREFIX)-gcc
 AS=$(PREFIX)-as
 LD=$(PREFIX)-ld
 
-CFLAGS=-ffreestanding -mgeneral-regs-only -Wall -Werror
+CFLAGS=-ffreestanding -fno-pic -mgeneral-regs-only -mcmodel=kernel -mno-red-zone \
+       -Wall -Wextra -Werror -Wno-unused-parameter -Wno-unused-function
 LFLAGS=-nostdlib -ffreestanding -lgcc
 
 SRC_FILES=$(wildcard common/*.c) arch/$(ARCH)/serial.c
