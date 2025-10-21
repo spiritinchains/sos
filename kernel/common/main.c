@@ -63,8 +63,7 @@ void kmain(void) {
         fb_ptr[i * (framebuffer->pitch / 4) + i] = 0xffffff;
     }
 
-    uint8_t text[] = "Hello from SOS";
-    serial_write(0, text, 14);
+    serial_write(0, (uint8_t *) "Hello from SOS", 14);
 
     // We're done, just hang...
     hcf();
