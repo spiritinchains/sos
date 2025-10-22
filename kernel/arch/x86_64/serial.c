@@ -10,6 +10,13 @@ static const uint16_t PORT[] = {
 
 #define IS_PORT_ID_VALID(id) (((id) >= 0) && ((id) < (int) (sizeof(PORT) / sizeof(uint16_t))))
 
+static bool serial_is_data_available(const uint16_t address)
+{
+    uint16_t value;
+    inb(address + SERIAL_REG_READ_LINE_STATUS, value);
+    return (bool) (value & SERIAL_LINE_DR);
+}
+
 static bool serial_is_transmit_empty(const uint16_t address)
 {
     uint16_t value;
@@ -17,14 +24,30 @@ static bool serial_is_transmit_empty(const uint16_t address)
     return (bool) (value & SERIAL_LINE_THRE);
 }
 
-static void serial_transmit_byte(const uint16_t address, const uint8_t data)
+static inline uint8_t serial_receive_byte(const uint16_t address)
+{
+    uint8_t data;
+    inb(address, data);
+    return data;
+}
+
+static inline void serial_transmit_byte(const uint16_t address, const uint8_t data)
 {
     outb(address, data);
 }
 
 void serial_read(const int id, uint8_t data[], const size_t len)
 {
-    // TODO
+    if (!IS_PORT_ID_VALID(id))
+    {
+        return;
+    }
+
+    for (size_t i = 0; i < len; i++)
+    {
+        while (!serial_is_data_available(PORT[id])) {}
+        data[i] = serial_receive_byte(PORT[id]);
+    }
 }
 
 void serial_write(const int id, const uint8_t data[], const size_t len)
