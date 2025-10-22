@@ -1,4 +1,6 @@
-#!usr/bin/env bash
+#!/usr/bin/env bash
+
+mkdir -p dist
 
 # Create the bootable ISO.
 xorriso -as mkisofs -R -r -J -b boot/limine/limine-bios-cd.bin \
