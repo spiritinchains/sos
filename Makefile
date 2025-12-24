@@ -1,5 +1,5 @@
 
-all: boot kernel
+all: boot kernel iso
 
 boot:
 	make -C boot
@@ -14,6 +14,8 @@ clean:
 	make -C kernel clean
 	make -C boot clean
 
+iso: dist/sos.iso
+
 dist/sos.iso: boot kernel
 	mkdir -p iso
 	mkdir -p iso/boot
@@ -23,6 +25,12 @@ dist/sos.iso: boot kernel
 	mkdir -p iso/EFI/BOOT
 	cp -v boot/limine/BOOTX64.EFI iso/EFI/BOOT/
 	cp -v boot/limine/BOOTIA32.EFI iso/EFI/BOOT/
-	bash mkiso.sh
+	mkdir -p dist
+	xorriso -as mkisofs -R -r -J -b boot/limine/limine-bios-cd.bin \
+        -no-emul-boot -boot-load-size 4 -boot-info-table -hfsplus \
+        -apm-block-size 2048 --efi-boot boot/limine/limine-uefi-cd.bin \
+        -efi-boot-part --efi-boot-image --protective-msdos-label \
+        iso -o dist/sos.iso
+	boot/limine/limine bios-install dist/sos.iso
 
-.PHONY: all boot kernel clean
+.PHONY: all boot kernel iso clean

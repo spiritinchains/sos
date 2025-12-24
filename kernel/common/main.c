@@ -3,7 +3,7 @@
 #include <stdbool.h>
 
 #include "limine.h"
-#include <arch/x86_64/serial.h>
+#include <serial.h>
 
 // Set the base revision to 3, this is recommended as this is the latest
 // base revision described by the Limine boot protocol specification.
