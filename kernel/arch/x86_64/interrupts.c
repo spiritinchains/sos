@@ -1,6 +1,6 @@
-#include "common.h"
-#include "interrupts.h"
-#include "apic.h"
+#include <interrupts.h>
+#include <common.h>
+#include <apic.h>
 
 /*
  * x86_64 defines the first 32 interrupts for processor traps, faults and exceptions.
@@ -58,12 +58,10 @@
 
 #define ISR __attribute__((interrupt))
 
-ISR void isr_dummy();
-
 static struct idt_descriptor {
     uint16_t size;
     uint64_t base;
-}__attribute__((packed)); IDTR;
+}__attribute__((packed)) IDTR;
 
 struct idt_entry {
     uint16_t offset_0_15;       // Code offset bits 0-15
@@ -79,6 +77,8 @@ struct idt_entry {
     uint32_t reserved;
 }__attribute__((packed));
 
+ISR void isr_dummy(void *frame, uint64_t error_code);
+
 static void (*s_intr_callback[256])(uint8_t) = {};
 
 static struct idt_entry IDT[256] = {};
@@ -86,7 +86,7 @@ static struct idt_entry IDT[256] = {};
 void interrupts_init(void)
 {
     // Initialize Interrupt Controller
-    pic_8259a_init();
+    // pic_8259a_init();
 
     // Initialize Interrupt Descriptor Table
     IDTR.size = sizeof(IDT);
@@ -106,7 +106,7 @@ void interrupts_exec_callback(uint8_t index)
     }
 }
 
-ISR void isr_dummy()
+ISR void isr_dummy(void *frame, uint64_t error_code)
 {
     // Do Nothing
 }
