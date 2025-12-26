@@ -2,8 +2,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#include "limine.h"
-#include <serial.h>
+#include <limine.h>
 
 // Set the base revision to 3, this is recommended as this is the latest
 // base revision described by the Limine boot protocol specification.
@@ -18,8 +17,26 @@ static volatile LIMINE_BASE_REVISION(3);
 // once or marked as used with the "used" attribute as done here.
 
 __attribute__((used, section(".limine_requests")))
+static volatile struct limine_executable_cmdline_request cmdline_request = {
+    .id = LIMINE_EXECUTABLE_CMDLINE_REQUEST,
+    .revision = 0
+};
+
+__attribute__((used, section(".limine_requests")))
+static volatile struct limine_firmware_type_request firmware_type_request = {
+    .id = LIMINE_FIRMWARE_TYPE_REQUEST,
+    .revision = 0
+};
+
+__attribute__((used, section(".limine_requests")))
 static volatile struct limine_framebuffer_request framebuffer_request = {
     .id = LIMINE_FRAMEBUFFER_REQUEST,
+    .revision = 0
+};
+
+__attribute__((used, section(".limine_requests")))
+static volatile struct limine_dtb_request dtb_request = {
+    .id = LIMINE_DTB_REQUEST,
     .revision = 0
 };
 
@@ -33,6 +50,7 @@ __attribute__((used, section(".limine_requests_end")))
 static volatile LIMINE_REQUESTS_END_MARKER;
 
 // Halt and catch fire function.
+// TODO: make this arch independent
 static void hcf(void) {
     for (;;) {
         asm ("hlt");
@@ -47,8 +65,6 @@ void kmain(void) {
     if (LIMINE_BASE_REVISION_SUPPORTED == false) {
         hcf();
     }
-
-    serial_write(0, (uint8_t *) "Hello from SOS", 14);
 
     // We're done, just hang...
     hcf();
