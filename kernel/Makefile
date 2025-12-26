@@ -7,7 +7,8 @@ AS=$(PREFIX)-as
 LD=$(PREFIX)-ld
 
 CFLAGS=-ffreestanding -fno-pic -mgeneral-regs-only -mcmodel=kernel -mno-red-zone \
-       -Wall -Wextra -Werror -Wno-unused-parameter -Wno-unused-function
+       -Wall -Wextra -Werror -Wno-unused-parameter -Wno-unused-function \
+	   -DKERNEL_ARCH="$(ARCH)"
 LFLAGS=-nostdlib -ffreestanding -lgcc
 
 SRC_FILES=$(wildcard common/*.c) $(wildcard lib/*.c) $(wildcard $(ARCH_DIR)/*.c)
